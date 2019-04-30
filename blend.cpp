@@ -83,7 +83,6 @@ int get_travel_time(double dis) {
 }
 void netpoint_input() {
 	int count = 0;
-	netpoint[NET_NUM] = { Position() };
 	FILE *fp = fopen("new_1.csv", "r");
 	while (count < 5) {
 		char idchar[10], c;
@@ -108,7 +107,6 @@ void netpoint_input() {
 
 void delivery_input() {
 	int count = 0;
-	delivery[DELV_NUM] = { Position() };
 	FILE *fp = fopen("new_2.csv", "r");
 	while (count < DELV_NUM) {
 		char idchar[10], c;
