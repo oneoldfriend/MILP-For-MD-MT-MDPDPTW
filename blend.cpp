@@ -791,19 +791,33 @@ int main()
 				}
 			}
 		}
+		for (int k = 0; k < courior; k++)
+		{
+			for (int i = depot_index; i < node_num; i++)
+			{
+				for (int j = depot_index; j < node_num; j++)
+				{
+					model.add(x[k][i][j] + x[k][j][i] <= 1);
+				}
+			}
+		}*/
 
+		//variable cut
 		//departure time cut
-		for (int i = Eo_index; i < Ed_index; i++)
+		/*for (int i = Eo_index; i < Ed_index; i++)
 		{
 			model.add(dt[i] <= at[i + order_num] - t[i][i + order_num]);
 			model.add(dt[i + order_num] >= e[i] + t[i][i + order_num]);
 		}
 
 		//weight cut
-		for (int k = 0;k<courior;k++){
-			for (int i = Eo_index; i < end_index;i++){
+		for (int k = 0; k < courior; k++)
+		{
+			for (int i = Eo_index; i < end_index; i++)
+			{
 				IloExpr arcVisit(env);
-				for (int j = Eo_index; j < end_index;j++){
+				for (int j = Eo_index; j < end_index; j++)
+				{
 					arcVisit += x[k][i][j] * q[j];
 				}
 				model.add(w[i] <= W - arcVisit);
