@@ -14,8 +14,8 @@ using namespace std;
 #define NET_NUM 5
 #define SHOP_NUM 8
 #define DELV_NUM 40
-#define ECO_NUM 5
-#define OTO_NUM 5
+#define ECO_NUM 0
+#define OTO_NUM 8
 #define CAR_NUM 2
 
 ILOSTLBEGIN
@@ -420,9 +420,9 @@ void define_data(IloEnv env)
 			}
 			double dis = get_distance(iPos, jPos);
 			if (j != end_index)
-				t[i][j] = IloInt(get_travel_time(dis));
+				t[i][j] = IloInt(get_travel_time(dis)) + s[i];
 			else
-				t[i][j] = IloInt(0);
+				t[i][j] = IloInt(0) + s[i];
 		}
 	}
 }
@@ -530,7 +530,7 @@ int main()
 		}
 		for (int i = depot_index; i < node_num; i++)
 		{
-			other_time += s[i] + wt[i];
+			other_time += wt[i];
 		}
 		for (int i = Eo_index; i < Fo_index; i++)
 		{
@@ -636,7 +636,7 @@ int main()
 			}
 		}
 
-		//contiunity of arrival time for every node
+		//continuity of arrival time for every node
 		for (int i = depot_index; i < end_index; i++)
 		{
 			for (int j = depot_index; j < end_index; j++)
@@ -691,7 +691,7 @@ int main()
 		//departure time constraints
 		for (int i = depot_index; i < node_num; i++)
 		{
-			model.add(dt[i] == at[i] + wt[i] + s[i]);
+			model.add(dt[i] == at[i] + wt[i]);
 		}
 
 		//order must be pickup first, then deliver
@@ -706,10 +706,10 @@ int main()
 			model.add(dt[i] == 0);
 		}
 
-		//open time window constriant & work time constriant
+		//open time window constraint & work time constraint
 		for (int i = depot_index; i < node_num; i++)
 		{
-			model.add(dt[i] - s[i] >= e[i]);
+			model.add(dt[i] >= e[i]);
 			model.add(dt[i] <= M);
 		}
 
@@ -751,6 +751,72 @@ int main()
 				}
 			}
 		}
+
+		//valid inequalities
+
+		//variable fixing
+		//cannot visit itself
+		/*for (int k = 0; k < courior; k++)
+		{
+			for (int i = 0; i < node_num; i++)
+			{
+				model.add(x[k][i][i] == 0);
+			}
+		}
+		//cannot depart once the vehicle got back to end node
+		for (int k = 0; k < courior; k++)
+		{
+			for (int i = depot_index; i < node_num; i++)
+			{
+				model.add(x[k][end_index][i] == 0);
+			}
+		}
+		//cannot visit destination before the origin
+		for (int k = 0; k < courior; k++)
+		{
+			for (int i = Eo_index; i < Ed_index; i++)
+			{
+				model.add(x[k][i + order_num][i] == 0);
+			}
+		}
+		//cannot visit origin first then finish delivery or visit the depots
+		for (int k = 0; k < courior; k++)
+		{
+			for (int i = Eo_index; i < Ed_index; i++)
+			{
+				model.add(x[k][i][end_index] == 0);
+				for (int j = depot_index; j < Eo_index; j++)
+				{
+					model.add(x[k][i][j] == 0);
+				}
+			}
+		}
+
+		//departure time cut
+		for (int i = Eo_index; i < Ed_index; i++)
+		{
+			model.add(dt[i] <= at[i + order_num] - t[i][i + order_num]);
+			model.add(dt[i + order_num] >= e[i] + t[i][i + order_num]);
+		}
+
+		//weight cut
+		for (int k = 0;k<courior;k++){
+			for (int i = Eo_index; i < end_index;i++){
+				IloExpr arcVisit(env);
+				for (int j = Eo_index; j < end_index;j++){
+					arcVisit += x[k][i][j] * q[j];
+				}
+				model.add(w[i] <= W - arcVisit);
+				model.add(w[i] >= q[i]);
+				arcVisit.end();
+			}
+		}
+
+		//waiting time upper bound
+		for (int i = Eo_index; i < node_num; i++)
+		{
+			model.add(wt[i] <= e[i]);
+		}*/
 
 		// Optimize
 		IloCplex cplex(model);
