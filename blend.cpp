@@ -14,9 +14,10 @@ using namespace std;
 #define NET_NUM 5
 #define SHOP_NUM 8
 #define DELV_NUM 40
-#define ECO_NUM 0
-#define OTO_NUM 8
-#define CAR_NUM 2
+#define ECO_NUM 20
+#define OTO_NUM 20
+#define RUNNING_HOURS 10
+#define ENABLE_INEQUALITY 1
 
 ILOSTLBEGIN
 
@@ -88,10 +89,12 @@ int get_travel_time(double dis)
 {
 	return round(dis / speed);
 }
-void netpoint_input()
+void netpoint_input(string path)
 {
 	int count = 0;
-	FILE *fp = fopen("data/new_1.csv", "r");
+	string fileName = "new_1.csv";
+	path += fileName;
+	FILE *fp = fopen(path.c_str(), "r");
 	while (count < 5)
 	{
 		char idchar[10], c;
@@ -116,10 +119,12 @@ void netpoint_input()
 	fclose(fp);
 }
 
-void delivery_input()
+void delivery_input(string path)
 {
 	int count = 0;
-	FILE *fp = fopen("data/new_2.csv", "r");
+	string fileName = "new_2.csv";
+	path += fileName;
+	FILE *fp = fopen(path.c_str(), "r");
 	while (count < DELV_NUM)
 	{
 		char idchar[10], c;
@@ -144,10 +149,12 @@ void delivery_input()
 	fclose(fp);
 }
 
-void shop_input()
+void shop_input(string path)
 {
 	int count = 0;
-	FILE *fp = fopen("data/new_3.csv", "r");
+	string fileName = "new_3.csv";
+	path += fileName;
+	FILE *fp = fopen(path.c_str(), "r");
 	while (count < SHOP_NUM)
 	{
 		char idchar[10], c;
@@ -172,14 +179,16 @@ void shop_input()
 	fclose(fp);
 }
 
-void eorder_input()
+void eorder_input(string path)
 {
 	int count = 0;
-	FILE *fp = fopen("data/new_4.csv", "r");
+	string fileName = "new_4.csv";
+	path += fileName;
+	FILE *fp = fopen(path.c_str(), "r");
 	while (count < ECO_NUM)
 	{
 		char idchar[10];
-		int i = 0, id = 0, orderid = 0;
+		int i = 0, id = 0, order_id = 0;
 		while (1)
 		{
 			fscanf(fp, "%c", &idchar[i]);
@@ -190,8 +199,8 @@ void eorder_input()
 			}
 			i++;
 		}
-		orderid = char_to_int(idchar);
-		strcpy(eco_order[orderid].id, idchar);
+		order_id = char_to_int(idchar);
+		strcpy(eco_order[order_id].id, idchar);
 		i = 0;
 		while (1)
 		{
@@ -204,7 +213,7 @@ void eorder_input()
 			i++;
 		}
 		id = char_to_int(idchar);
-		eco_order[orderid].dest = delivery[id];
+		eco_order[order_id].dest = delivery[id];
 		i = 0;
 		while (1)
 		{
@@ -217,21 +226,23 @@ void eorder_input()
 			i++;
 		}
 		id = char_to_int(idchar);
-		eco_order[orderid].origin = netpoint[id];
-		fscanf(fp, "%d\n", &eco_order[orderid].weight);
+		eco_order[order_id].origin = netpoint[id];
+		fscanf(fp, "%d\n", &eco_order[order_id].weight);
 		count++;
 	}
 	fclose(fp);
 }
 
-void otoorder_input()
+void oto_order_input(string path)
 {
 	int count = 0;
-	FILE *fp = fopen("data/new_5.csv", "r");
+	string fileName = "new_5.csv";
+	path += fileName;
+	FILE *fp = fopen(path.c_str(), "r");
 	while (count < OTO_NUM)
 	{
 		char idchar[10];
-		int i = 0, id = 0, orderid = 0;
+		int i = 0, id = 0, order_id = 0;
 		while (1)
 		{
 			fscanf(fp, "%c", &idchar[i]);
@@ -242,8 +253,8 @@ void otoorder_input()
 			}
 			i++;
 		}
-		orderid = char_to_int(idchar);
-		strcpy(oto_order[orderid].id, idchar);
+		order_id = char_to_int(idchar);
+		strcpy(oto_order[order_id].id, idchar);
 		i = 0;
 		while (1)
 		{
@@ -256,7 +267,7 @@ void otoorder_input()
 			i++;
 		}
 		id = char_to_int(idchar);
-		oto_order[orderid].dest = delivery[id];
+		oto_order[order_id].dest = delivery[id];
 		i = 0;
 		while (1)
 		{
@@ -269,7 +280,7 @@ void otoorder_input()
 			i++;
 		}
 		id = char_to_int(idchar);
-		oto_order[orderid].origin = shop[id];
+		oto_order[order_id].origin = shop[id];
 		i = 0;
 		while (1)
 		{
@@ -281,7 +292,7 @@ void otoorder_input()
 			}
 			i++;
 		}
-		oto_order[orderid].start_time = char_to_time(idchar);
+		oto_order[order_id].start_time = char_to_time(idchar);
 		i = 0;
 		while (1)
 		{
@@ -293,14 +304,14 @@ void otoorder_input()
 			}
 			i++;
 		}
-		oto_order[orderid].end_time = char_to_time(idchar);
-		fscanf(fp, "%d\n", &oto_order[orderid].weight);
+		oto_order[order_id].end_time = char_to_time(idchar);
+		fscanf(fp, "%d\n", &oto_order[order_id].weight);
 		count++;
 	}
 	fclose(fp);
 }
 
-IloInt depot_index, depot_num, Eo_index, Ed_index, Fo_index, Fd_index, courior, order_num, end_index, node_num;
+IloInt depot_index, depot_num, Eo_index, Ed_index, Fo_index, Fd_index, courier, order_num, end_index, node_num;
 IloNumArray e, l, q, s;
 IloNumArray2 t;
 
@@ -323,17 +334,17 @@ int Package::service_time()
 	return round(3 * sqrt(weight) + 5);
 }
 
-void define_data(IloEnv env)
+void define_data(IloEnv env, int depotNum, int vehicleNum, int ecomNum, int o2oNum)
 {
-	depot_num = NET_NUM;
-	courior = CAR_NUM;
-	order_num = OTO_NUM + ECO_NUM;
+	depot_num = depotNum;
+	courier = vehicleNum;
+	order_num = o2oNum + ecomNum;
 	depot_index = 0;
 	Eo_index = depot_index + depot_num;
-	Fo_index = Eo_index + OTO_NUM;
-	Ed_index = Fo_index + ECO_NUM;
-	Fd_index = Ed_index + OTO_NUM;
-	end_index = Fd_index + ECO_NUM;
+	Fo_index = Eo_index + o2oNum;
+	Ed_index = Fo_index + ecomNum;
+	Fd_index = Ed_index + o2oNum;
+	end_index = Fd_index + ecomNum;
 	node_num = end_index + 1;
 	t = IloNumArray2(env, node_num);
 	e = IloNumArray(env, node_num);
@@ -451,22 +462,30 @@ ILOMIPINFOCALLBACK6(timeIntervalCallback,
 			timeBefore = timeNow;
 		}
 	}
-	if (timeNow / 3600 > 5)
+	if (timeNow / 3600 > RUNNING_HOURS)
 		abort();
 }
 
-int main()
+int main(int argc, char** argv)
 {
-	netpoint_input();
-	delivery_input();
-	shop_input();
-	eorder_input();
-	otoorder_input();
+	int depotNum = atoi(argv[1]);
+	int vehicleNum = atoi(argv[2]);
+	int ecomNum = atoi(argv[3]);
+	int o2oNum = atoi(argv[4]);
+	int instanceNum = atoi(argv[5]);
+	char num[] = {char(instanceNum + 48), '/', '\0'};
+	string path = "instance";
+	path += num;
+	netpoint_input(path);
+	delivery_input(path);
+	shop_input(path);
+	eorder_input(path);
+	oto_order_input(path);
 	IloEnv env;
 	//ofstream res("CallBackResult.csv", ios::app);
 	try
 	{
-		define_data(env);
+		define_data(env, depotNum, vehicleNum, ecomNum, o2oNum);
 
 		//check input data
 		/*for (int i = 0; i < node_num; i++) {
@@ -487,8 +506,8 @@ int main()
 		IloModel model(env);
 
 		//Variable Define
-		NumVar3Matrix x(env, courior);
-		for (int k = 0; k < courior; k++)
+		NumVar3Matrix x(env, courier);
+		for (int k = 0; k < courier; k++)
 		{
 			x[k] = NumVarMatrix(env, node_num);
 			for (int i = 0; i < node_num; i++)
@@ -518,7 +537,7 @@ int main()
 		IloExpr travel_time(env);
 		IloExpr penalty(env);
 		IloExpr other_time(env);
-		for (int k = 0; k < courior; k++)
+		for (int k = 0; k < courier; k++)
 		{
 			for (int i = depot_index; i < node_num; i++)
 			{
@@ -544,8 +563,8 @@ int main()
 
 		// Constraints
 
-		//every courior start from depot and finish delivery at end node
-		for (int k = 0; k < courior; k++)
+		//every courier start from depot and finish delivery at end node
+		for (int k = 0; k < courier; k++)
 		{
 			IloExpr depotStart(env);
 			for (int i = depot_index; i < Eo_index; i++)
@@ -558,7 +577,7 @@ int main()
 			model.add(depotStart == 1);
 			depotStart.end();
 		}
-		for (int k = 0; k < courior; k++)
+		for (int k = 0; k < courier; k++)
 		{
 			IloExpr endVehicle(env);
 			for (int i = depot_index; i < end_index; i++)
@@ -573,7 +592,7 @@ int main()
 		for (int j = Eo_index; j < end_index; j++)
 		{
 			IloExpr orderVisit(env);
-			for (int k = 0; k < courior; k++)
+			for (int k = 0; k < courier; k++)
 			{
 				for (int i = depot_index; i < node_num; i++)
 				{
@@ -587,7 +606,7 @@ int main()
 		}
 
 		//flow constraint
-		for (int k = 0; k < courior; k++)
+		for (int k = 0; k < courier; k++)
 		{
 			for (int i = Eo_index; i < end_index; i++)
 			{
@@ -611,8 +630,8 @@ int main()
 			}
 		}
 
-		//orders have to be pickup and delivered by same courior
-		for (int k = 0; k < courior; k++)
+		//orders have to be pickup and delivered by same courier
+		for (int k = 0; k < courier; k++)
 		{
 			for (int j = Eo_index; j < Ed_index; j++)
 			{
@@ -644,7 +663,7 @@ int main()
 				if (i == j)
 					continue;
 				IloExpr arcVisit(env);
-				for (int k = 0; k < courior; k++)
+				for (int k = 0; k < courier; k++)
 				{
 					arcVisit += x[k][i][j];
 				}
@@ -659,7 +678,7 @@ int main()
 				if (i == j)
 					continue;
 				IloExpr arcVisit(env);
-				for (int k = 0; k < courior; k++)
+				for (int k = 0; k < courier; k++)
 				{
 					arcVisit += x[k][i][j];
 				}
@@ -719,7 +738,7 @@ int main()
 			for (int j = Eo_index; j < end_index; j++)
 			{
 				IloExpr arcVisit(env);
-				for (int k = 0; k < courior; k++)
+				for (int k = 0; k < courier; k++)
 				{
 					arcVisit += x[k][i][j];
 				}
@@ -732,7 +751,7 @@ int main()
 		for (int i = 0; i < depot_index; i++)
 			model.add(w[i] == 0);
 
-		//capacity constriant
+		//capacity constraint
 		for (int i = 0; i < node_num; i++)
 		{
 			model.add(w[i] >= 0);
@@ -740,7 +759,7 @@ int main()
 		}
 
 		//binary variable constraint
-		for (int k = 0; k < courior; k++)
+		for (int k = 0; k < courier; k++)
 		{
 			for (int i = 0; i < node_num; i++)
 			{
@@ -754,83 +773,86 @@ int main()
 
 		//valid inequalities
 
-		//variable fixing
-		//cannot visit itself
-		/*for (int k = 0; k < courior; k++)
+		if (ENABLE_INEQUALITY)
 		{
-			for (int i = 0; i < node_num; i++)
+			//variable fixing
+			//cannot visit itself
+			for (int k = 0; k < courier; k++)
 			{
-				model.add(x[k][i][i] == 0);
+				for (int i = 0; i < node_num; i++)
+				{
+					model.add(x[k][i][i] == 0);
+				}
 			}
-		}
-		//cannot depart once the vehicle got back to end node
-		for (int k = 0; k < courior; k++)
-		{
-			for (int i = depot_index; i < node_num; i++)
+			//cannot depart once the vehicle got back to end node
+			for (int k = 0; k < courier; k++)
 			{
-				model.add(x[k][end_index][i] == 0);
+				for (int i = depot_index; i < node_num; i++)
+				{
+					model.add(x[k][end_index][i] == 0);
+				}
 			}
-		}
-		//cannot visit destination before the origin
-		for (int k = 0; k < courior; k++)
-		{
+			//cannot visit destination before the origin
+			for (int k = 0; k < courier; k++)
+			{
+				for (int i = Eo_index; i < Ed_index; i++)
+				{
+					model.add(x[k][i + order_num][i] == 0);
+				}
+			}
+			//cannot visit origin first then finish delivery or visit the depots
+			for (int k = 0; k < courier; k++)
+			{
+				for (int i = Eo_index; i < Ed_index; i++)
+				{
+					model.add(x[k][i][end_index] == 0);
+					for (int j = depot_index; j < Eo_index; j++)
+					{
+						model.add(x[k][i][j] == 0);
+					}
+				}
+			}
+			for (int k = 0; k < courier; k++)
+			{
+				for (int i = depot_index; i < node_num; i++)
+				{
+					for (int j = depot_index; j < node_num; j++)
+					{
+						model.add(x[k][i][j] + x[k][j][i] <= 1);
+					}
+				}
+			}
+
+			//variable cut
+			//departure time cut
 			for (int i = Eo_index; i < Ed_index; i++)
 			{
-				model.add(x[k][i + order_num][i] == 0);
+				model.add(dt[i] <= at[i + order_num] - t[i][i + order_num]);
+				model.add(dt[i + order_num] >= e[i] + t[i][i + order_num]);
 			}
-		}
-		//cannot visit origin first then finish delivery or visit the depots
-		for (int k = 0; k < courior; k++)
-		{
-			for (int i = Eo_index; i < Ed_index; i++)
+
+			//weight cut
+			for (int k = 0; k < courier; k++)
 			{
-				model.add(x[k][i][end_index] == 0);
-				for (int j = depot_index; j < Eo_index; j++)
+				for (int i = Eo_index; i < end_index; i++)
 				{
-					model.add(x[k][i][j] == 0);
+					IloExpr arcVisit(env);
+					for (int j = Eo_index; j < end_index; j++)
+					{
+						arcVisit += x[k][i][j] * q[j];
+					}
+					model.add(w[i] <= W - arcVisit);
+					model.add(w[i] >= q[i]);
+					arcVisit.end();
 				}
 			}
-		}
-		for (int k = 0; k < courior; k++)
-		{
-			for (int i = depot_index; i < node_num; i++)
-			{
-				for (int j = depot_index; j < node_num; j++)
-				{
-					model.add(x[k][i][j] + x[k][j][i] <= 1);
-				}
-			}
-		}*/
 
-		//variable cut
-		//departure time cut
-		/*for (int i = Eo_index; i < Ed_index; i++)
-		{
-			model.add(dt[i] <= at[i + order_num] - t[i][i + order_num]);
-			model.add(dt[i + order_num] >= e[i] + t[i][i + order_num]);
-		}
-
-		//weight cut
-		for (int k = 0; k < courior; k++)
-		{
-			for (int i = Eo_index; i < end_index; i++)
+			//waiting time upper bound
+			for (int i = Eo_index; i < node_num; i++)
 			{
-				IloExpr arcVisit(env);
-				for (int j = Eo_index; j < end_index; j++)
-				{
-					arcVisit += x[k][i][j] * q[j];
-				}
-				model.add(w[i] <= W - arcVisit);
-				model.add(w[i] >= q[i]);
-				arcVisit.end();
+				model.add(wt[i] <= e[i]);
 			}
 		}
-
-		//waiting time upper bound
-		for (int i = Eo_index; i < node_num; i++)
-		{
-			model.add(wt[i] <= e[i]);
-		}*/
 
 		// Optimize
 		IloCplex cplex(model);
@@ -845,10 +867,10 @@ int main()
 		env.out() << "Solution value  = " << cplex.getObjValue() << endl;
 		//display the value of variable
 		//ofstream solution("solution.csv");
-		/*for (int k = 0; k < courior; k++)
+		/*for (int k = 0; k < courier; k++)
 		{
 			int flag = 0;
-			printf("courior No.%d\n", k + 1);
+			printf("courier No.%d\n", k + 1);
 			// x matrix
 			for (int i = depot_index; i < node_num; i++) {
 				for (int j = depot_index; j < node_num; j++) {
